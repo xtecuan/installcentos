@@ -9,12 +9,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 containerized=true
 openshift_release=v1.3
 openshift_image_tag=v1.3.0
-openshift_public_hostname=console.<%= @config.cluster.name %>.<%= @config.cluster.domain %>
-openshift_master_default_subdomain=apps.<%= @config.cluster.name %>.<%= @config.cluster.domain %>
+openshift_public_hostname=console.techdope.io
+openshift_master_default_subdomain=apps.console.techdope.io
 openshift_hosted_metrics_deploy=false
 
 [masters]
-console.<%= @config.cluster.name %>.<%= @config.cluster.domain %> openshift_schedulable=true
+console.techdope.io openshift_schedulable=true
 
 [nodes]
-console.<%= @config.cluster.name %>.<%= @config.cluster.domain %> openshift_node_labels="{'region': 'infra', 'zone': 'default'}" openshift_schedulable=true
+console.techdope.io openshift_node_labels="{'region': 'infra', 'zone': 'default'}" openshift_schedulable=true
