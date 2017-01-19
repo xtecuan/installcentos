@@ -7,11 +7,12 @@ ansible_ssh_user=root
 deployment_type=origin
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 containerized=true
-openshift_release=v1.3
-openshift_image_tag=v1.3.0
+openshift_release=v1.4
+openshift_image_tag=v1.4.0
 openshift_public_hostname=console.techdope.io
 openshift_master_default_subdomain=apps.console.techdope.io
 openshift_hosted_metrics_deploy=false
+
 
 [masters]
 console.techdope.io openshift_schedulable=true
