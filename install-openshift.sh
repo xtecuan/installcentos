@@ -44,7 +44,7 @@ echo 'INSECURE_REGISTRY="--insecure-registry 172.30.0.0/16"' >> /etc/sysconfig/d
 ########################################################################################################
 #See: http://blog.hashbangbash.com/2014/11/docker-devicemapper-fix-for-device-or-resource-busy-ebusy/
 cp -p /usr/lib/systemd/system/docker.service /usr/lib/systemd/system/docker.service.ORIGINAL
-sed 's/MountFlags=slave/MountFlags=private/' -i /usr/lib/systemd/system/docker.service
+## NO, IT DOES NOT WORK:: sed 's/MountFlags=slave/MountFlags=private/' -i /usr/lib/systemd/system/docker.service
 ########################################################################################################
 
 
