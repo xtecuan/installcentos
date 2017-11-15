@@ -1,6 +1,7 @@
 [OSEv3:children]
 masters
 nodes
+etcd
 
 [OSEv3:vars]
 ansible_ssh_user=root
@@ -11,7 +12,12 @@ openshift_release=v3.6.1
 openshift_image_tag=v3.6.1
 openshift_public_hostname=console.techdope.io
 openshift_master_default_subdomain=apps.techdope.io
+openshift_metrics_install_metrics=true
 openshift_hosted_metrics_deploy=true
+openshift_hosted_metrics_selector='metrics=enabled'
+openshift_hosted_metrics_deployer_version=v3.6.0
+openshift_hosted_logging_deploy=true
+openshift_hosted_logging_deployer_version=v3.6.1
 
 openshift_master_overwrite_named_certificates=true
 openshift_master_named_certificates=[{"certfile": "/etc/letsencrypt/live/console.techdope.io/cert.pem", "keyfile": "/etc/letsencrypt/live/console.techdope.io/privkey.pem", "cafile": "/etc/letsencrypt/live/console.techdope.io/fullchain.pem"}]
@@ -19,6 +25,9 @@ openshift_master_named_certificates=[{"certfile": "/etc/letsencrypt/live/console
 
 [masters]
 console.techdope.io openshift_schedulable=true
+
+[etcd]
+console.techdope.io
 
 [nodes]
 console.techdope.io openshift_node_labels="{'region': 'infra', 'zone': 'default'}" openshift_schedulable=true
