@@ -53,7 +53,8 @@ systemctl enable docker
 
 cd ~/workspace
 cat installcentos/inventory.erb | sed "s/techdope.io/${DOMAIN}/g" > /tmp/installcentos-inventory.erb
-ansible-playbook -i /tmp/installcentos-inventory.erb openshift-ansible/playbooks/byo/config.yml
+ansible-playbook -i /tmp/installcentos-inventory.erb openshift-ansible/playbooks/byo/prerrequistes.yml
+ansible-playbook -i /tmp/installcentos-inventory.erb openshift-ansible/playbooks/byo/deploy-cluster.yml
 
 #################################################################
 ##            PLEASE CHOOSE BETTER CREDENTIALS
