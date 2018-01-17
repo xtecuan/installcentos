@@ -21,18 +21,19 @@ python-cryptography pyOpenSSL.x86_64 python2-pip \
 openssl-devel python-devel httpd-tools NetworkManager python-passlib \
 java-1.8.0-openjdk-headless "@Development Tools"
 
-systemctl start NetworkManager
-systemctl enable NetworkManager
+systemctl | grep "NetworkManager.*running" 
+if [ $? -eq 1 ]; then
+	systemctl start NetworkManager
+	systemctl enable NetworkManager
+fi
 
-pip install -Iv ansible
+which ansible || pip install -Iv ansible
 
-git clone http://github.com/openshift/openshift-ansible
+[ ! -d openshift-ansible ] && git clone http://github.com/openshift/openshift-ansible
 
-cd openshift-ansible
-git checkout release-3.7
-cd ..
+cd openshift-ansible && git fetch && git checkout release-3.7 && cd ..
 
-git clone $SCRIPT_REPO
+[ ! -d installcentos ] && git clone $SCRIPT_REPO
 
 cat <<EOD > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 console console.${DOMAIN} $(hostname)
@@ -54,14 +55,29 @@ else
 	docker-storage-setup
 fi
 
-systemctl start docker
+systemctl restart docker
 systemctl enable docker
 
-ssh-keygen -q -f ~/.ssh/id_rsa -N ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-ssh -o StrictHostKeyChecking=no root@localhost "exit"
+if [ ! -f ~/.ssh/id_rsa ]; then
+	ssh-keygen -q -f ~/.ssh/id_rsa -N ""
+	cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+	ssh -o StrictHostKeyChecking=no root@127.0.0.1 "pwd" < /dev/null
+fi
 
-cat installcentos/inventory.ini | sed "s/:DOMAIN:/${DOMAIN}/g" > inventory.ini
+METRICS="True"
+LOGGING="True"
+
+memory=$(cat /proc/meminfo | grep MemTotal | sed "s/MemTotal:[ ]*\([0-9]*\) kB/\1/")
+
+if [ "$memory" -lt "4194304" ]; then
+	METRICS="False"
+fi
+
+if [ "$memory" -lt "8388608" ]; then
+	LOGGING="False"
+fi
+
+envsubst < installcentos/inventory.ini > inventory.ini
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/byo/config.yml
 
 htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
