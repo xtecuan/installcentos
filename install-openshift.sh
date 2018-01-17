@@ -2,16 +2,20 @@
 
 ## see: https://www.youtube.com/watch?v=-OOnGK-XeVY
 
-DOMAIN=${DOMAIN:="$(curl ipinfo.io/ip).nip.io"}
-USERNAME=${USERNAME:="$(whoami)"}
-PASSWORD=${PASSWORD:=password}
+export DOMAIN=${DOMAIN:="$(curl ipinfo.io/ip).nip.io"}
+export USERNAME=${USERNAME:="$(whoami)"}
+export PASSWORD=${PASSWORD:=password}
+export VERSION=${VERSION:="v3.7.0"}
 
-SCRIPT_REPO=${SCRIPT_REPO:="http://github.com/gshipley/installcentos"}
+export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
+
+export IP="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"
 
 echo "******"
 echo "* Your domain is $DOMAIN "
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
+echo "* OpenShift version: $VERSION "
 echo "******"
 
 yum install -y epel-release
@@ -29,15 +33,14 @@ fi
 
 which ansible || pip install -Iv ansible
 
-[ ! -d openshift-ansible ] && git clone http://github.com/openshift/openshift-ansible
+[ ! -d openshift-ansible ] && git clone https://github.com/openshift/openshift-ansible.git
 
 cd openshift-ansible && git fetch && git checkout release-3.7 && cd ..
 
-[ ! -d installcentos ] && git clone $SCRIPT_REPO
-
 cat <<EOD > /etc/hosts
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 console console.${DOMAIN} $(hostname)
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+${IP}		$(hostname) console console.${DOMAIN} 
 EOD
 
 if [ -z $DISK ]; then 
@@ -61,27 +64,30 @@ systemctl enable docker
 if [ ! -f ~/.ssh/id_rsa ]; then
 	ssh-keygen -q -f ~/.ssh/id_rsa -N ""
 	cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-	ssh -o StrictHostKeyChecking=no root@127.0.0.1 "pwd" < /dev/null
+	ssh -o StrictHostKeyChecking=no root@$IP "pwd" < /dev/null
 fi
 
-METRICS="True"
-LOGGING="True"
+export METRICS="True"
+export LOGGING="True"
 
 memory=$(cat /proc/meminfo | grep MemTotal | sed "s/MemTotal:[ ]*\([0-9]*\) kB/\1/")
 
 if [ "$memory" -lt "4194304" ]; then
-	METRICS="False"
+	export METRICS="False"
 fi
 
 if [ "$memory" -lt "8388608" ]; then
-	LOGGING="False"
+	export LOGGING="False"
 fi
 
-envsubst < installcentos/inventory.ini > inventory.ini
+curl -o inventory.download $SCRIPT_REPO/inventory.ini
+envsubst < inventory.download > inventory.ini
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/byo/config.yml
 
 htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
 oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
+
+systemctl restart origin-master-api
 
 echo "******"
 echo "* Your conosle is https://console.$DOMAIN:8443"
