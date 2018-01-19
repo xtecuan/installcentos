@@ -46,7 +46,9 @@ EOD
 if [ -z $DISK ]; then 
 	echo "Not setting the Docker storage."
 else
-	echo DEVS=$DISK >> /etc/sysconfig/docker-storage-setup
+	cp /etc/sysconfig/docker-storage-setup /etc/sysconfig/docker-storage-setup.bk
+
+	echo DEVS=$DISK > /etc/sysconfig/docker-storage-setup
 	echo VG=DOCKER >> /etc/sysconfig/docker-storage-setup
 	echo SETUP_LVM_THIN_POOL=yes >> /etc/sysconfig/docker-storage-setup
 	echo DATA_SIZE="100%FREE" >> /etc/sysconfig/docker-storage-setup
