@@ -2,7 +2,7 @@ Install RedHat OpenShift Origin in your development box.
 
 ## Installation
 
-1. Create a VM as explained in [http://www.youtube.com/watch?v=-OOnGK-XeVY](this video) by Grant Shipley
+1. Create a VM as explained in https://youtu.be/aqXSbDZggK4 (this video) by Grant Shipley
 
 2. Define mandatory variables for the installation process
 
