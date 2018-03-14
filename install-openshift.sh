@@ -92,7 +92,7 @@ oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
 systemctl restart origin-master-api
 
 echo "******"
-echo "* Your conosle is https://console.$DOMAIN:8443"
+echo "* Your console is https://console.$DOMAIN:8443"
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
 echo "*"
