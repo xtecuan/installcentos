@@ -10,6 +10,7 @@ export VERSION=${VERSION:="v3.7.1"}
 export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
 
 export IP="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"
+export API_PORT=${API_PORT:="8443"}
 
 echo "******"
 echo "* Your domain is $DOMAIN "
@@ -92,13 +93,14 @@ oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
 systemctl restart origin-master-api
 
 echo "******"
-echo "* Your console is https://console.$DOMAIN:8443"
+
+echo "* Your conosle is https://console.$DOMAIN:$API_PORT"
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
 echo "*"
 echo "* Login using:"
 echo "*"
-echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:8443/"
+echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
 echo "******"
 
-oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:8443/
+oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
