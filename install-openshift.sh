@@ -1,15 +1,14 @@
 #!/bin/bash
 
-## see: https://www.youtube.com/watch?v=-OOnGK-XeVY
+## see: https://youtu.be/aqXSbDZggK4
 
 export DOMAIN=${DOMAIN:="$(curl ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
-export VERSION=${VERSION:="v3.9.0"}
-export VERSION_NUMBER=${VERSION_NUMBER:="3.9"}
+export VERSION=${VERSION:="v3.9"}
 
 
-export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/isreehari/installcentos/master"}
+export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
 
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
@@ -53,7 +52,7 @@ cd openshift-ansible && git fetch && git checkout release-3.9 && cd ..
 cat <<EOD > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-${IP}		$(hostname) master.${DOMAIN} node.${DOMAIN} console console.${DOMAIN}  
+${IP}		$(hostname) console console.${DOMAIN}  
 EOD
 
 if [ -z $DISK ]; then 
