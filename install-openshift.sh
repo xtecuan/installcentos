@@ -7,7 +7,6 @@ export DOMAIN=${DOMAIN:="$(curl ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
 export VERSION=${VERSION:="v3.9.0"}
-export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
 
@@ -31,12 +30,6 @@ read -rp "OpenShift Version: ($VERSION): " choice;
 if [ "$choice" != "" ] ; then
 	export VERSION="$choice";
 fi
-
-read -rp "Script Repo: ($SCRIPT_REPO): " choice;
-if [ "$choice" != "" ] ; then
-	export SCRIPT_REPO="$choice";
-fi
-
 read -rp "IP: ($IP): " choice;
 if [ "$choice" != "" ] ; then
 	export IP="$choice";
