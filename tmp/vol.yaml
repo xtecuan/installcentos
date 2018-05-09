@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: vol103
+  name: vol
 spec:
   capacity:
     storage: 500Gi 
@@ -10,4 +10,4 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Recycle
   hostPath:
-    path: /mnt/data/vol103
+    path: /mnt/data/vol
