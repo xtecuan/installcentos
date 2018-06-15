@@ -7,7 +7,8 @@ export INTERACTIVE=true;
 export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
-export VERSION=${VERSION:="v3.9.0"}
+export VERSION=${VERSION:="3.9.0"}
+export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
 
@@ -61,6 +62,9 @@ echo "* Your password is $PASSWORD "
 echo "* OpenShift version: $VERSION "
 echo "******"
 
+# install updates
+yum install -y update
+
 # install the following base packages
 yum install -y  wget git zile nano net-tools docker-1.13.1\
 				bind-utils iptables-services \
@@ -71,7 +75,7 @@ yum install -y  wget git zile nano net-tools docker-1.13.1\
 				java-1.8.0-openjdk-headless "@Development Tools"
 
 #install epel
-yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum -y install epel-release
 
 # Disable the EPEL repository globally so that is not accidentally used during later steps of the installation
 sed -i -e "s/^enabled=1/enabled=0/" /etc/yum.repos.d/epel.repo
@@ -136,6 +140,20 @@ fi
 
 curl -o inventory.download $SCRIPT_REPO/inventory.ini
 envsubst < inventory.download > inventory.ini
+
+# add proxy in inventory.ini if proxy variables are set
+if [ ! -z "${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}" ]; then
+	echo >> inventory.ini
+	echo "openshift_http_proxy=\"${HTTP_PROXY:-${http_proxy:-${HTTPS_PROXY:-${https_proxy}}}}\"" >> inventory.ini
+	echo "openshift_https_proxy=\"${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}\"" >> inventory.ini
+	if [ ! -z "${NO_PROXY:-${no_proxy}}" ]; then
+		__no_proxy="${NO_PROXY:-${no_proxy}},${IP},.${DOMAIN}"
+	else
+		__no_proxy="${IP},.${DOMAIN}"
+	fi
+	echo "openshift_no_proxy=\"${__no_proxy}\"" >> inventory.ini
+fi
+
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml
 
