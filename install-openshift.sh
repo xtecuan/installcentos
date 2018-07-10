@@ -3,7 +3,7 @@
 ## see: https://youtu.be/aqXSbDZggK4
 
 ## Default variables to use
-export INTERACTIVE=true;
+export INTERACTIVE=${INTERACTIVE:="true"}
 export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
@@ -12,15 +12,8 @@ export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/in
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
 
-## check for '-a' flag with getopts
-while getopts a o; do
-  case $o in
-    (a) INTERACTIVE=false;;
-  esac
-done
-
 ## Make the script interactive to set the variables
-if $INTERACTIVE ; then
+if [ "$INTERACTIVE" = "true" ]; then
 	read -rp "Domain to use: ($DOMAIN): " choice;
 	if [ "$choice" != "" ] ; then
 		export DOMAIN="$choice";

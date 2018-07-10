@@ -15,7 +15,7 @@ curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-ope
 
 ```
 # Domain name to access the cluster
-$ export DOMAIN=<public ip addres>.nip.io 
+$ export DOMAIN=<public ip address>.nip.io
 
 # User created after installation
 $ export USERNAME=<current user name>
@@ -32,10 +32,10 @@ $ export PASSWORD=password
 $ export DISK="/dev/sda"
 ```
 
-3. Run the automagic installation script as root with the `-a` flag:
+3. Run the automagic installation script as root with the environment variable in place:
 
 ```
-curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-openshift.sh -a | /bin/bash
+curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-openshift.sh | INTERACTIVE=false /bin/bash
 ```
 
 ## Development
