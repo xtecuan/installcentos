@@ -2,9 +2,16 @@ Install RedHat OpenShift Origin in your development box.
 
 ## Installation
 
-1. Create a VM as explained in [http://www.youtube.com/watch?v=-OOnGK-XeVY](this video) by Grant Shipley
+1. Create a VM as explained in https://youtu.be/aqXSbDZggK4 (this video) by Grant Shipley
 
-2. Define mandatory variables for the installation process
+2. Run the automagic installation script as root, it will prompt for mandatory variables.
+
+```
+curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-openshift.sh | /bin/bash
+```
+
+## Automation
+1. Define mandatory variables for the installation process
 
 ```
 # Domain name to access the cluster
@@ -17,7 +24,7 @@ $ export USERNAME=<current user name>
 $ export PASSWORD=password
 ```
 
-3. Define optional variables for the installation process
+2. Define optional variables for the installation process
 
 ```
 # Instead of using loopback, setup DeviceMapper on this disk.
@@ -25,10 +32,10 @@ $ export PASSWORD=password
 $ export DISK="/dev/sda"
 ```
 
-3. Run the automagic installation script as root:
+3. Run the automagic installation script as root with the `-a` flag:
 
 ```
-curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-openshift.sh | /bin/bash
+curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-openshift.sh -a | /bin/bash
 ```
 
 ## Development
