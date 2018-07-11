@@ -47,3 +47,16 @@ For development it's possible to switch the script repo
 $ export SCRIPT_REPO="https://raw.githubusercontent.com/gshipley/installcentos/master"
 $ curl $SCRIPT_REPO/install-openshift.sh | /bin/bash
 ```
+
+## Testing
+
+The script is tested using the included container and the `validate.sh` script. The SSH key passed to the container needs to be imported into DigitalOcean
+as `installcentos` or the `SSH_KEY_NAME` variable needs to be set.
+
+```
+make
+
+docker run -ti -e DIGITALOCEAN_ACCESS_TOKEN="<TOKEN>" \
+	-v <private key file path>:/root/.ssh/<private key file name> -v <private key file path>.pub:/root/.ssh/<private key file name>.pub \
+	quay.io/osevg/installcentos-validate
+```
