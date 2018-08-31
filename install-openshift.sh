@@ -151,7 +151,7 @@ fi
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml
 
-htpasswd -b -c /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
+htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
 oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
 
 systemctl restart origin-master-api
