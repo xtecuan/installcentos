@@ -1,13 +1,22 @@
-Install RedHat OpenShift Origin in your development box.
+Install RedHat OKD 3.10 on your development box.
+
+This repository is a set of scripts that will allow you easily install the latest version (3.10) of OKD in a single node fashion.  What that means is that all of the services required for OKD to function (master, node, etcd, etc.) will all be installed on a single host.  The script supports a custom hostname which you can provide using the interactive mode.
 
 ## Installation
 
 1. Create a VM as explained in https://youtu.be/aqXSbDZggK4 (this video) by Grant Shipley
 
-2. Run the automagic installation script as root, it will prompt for mandatory variables.
+2. Clone this repo
 
 ```
-curl https://raw.githubusercontent.com/gshipley/installcentos/master/install-openshift.sh | /bin/bash
+git clone https://github.com/gshipley/installcentos.git
+```
+
+3. Execute the installation script
+
+```
+cd installcentos
+./install-openshift.sh
 ```
 
 ## Automation
