@@ -148,6 +148,7 @@ if [ ! -z "${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}" ]; then
 	echo "openshift_no_proxy=\"${__no_proxy}\"" >> inventory.ini
 fi
 
+mkdir -p /etc/origin/master/
 touch /etc/origin/master/htpasswd
 
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml
