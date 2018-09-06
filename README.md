@@ -4,7 +4,7 @@ This repository is a set of scripts that will allow you easily install the lates
 
 ## Installation
 
-1. Create a VM as explained in https://youtu.be/aqXSbDZggK4 (this video) by Grant Shipley
+1. Create a VM as explained in https://www.youtube.com/watch?v=ZkFIozGY0IA (this video) by Grant Shipley
 
 2. Clone this repo
 
