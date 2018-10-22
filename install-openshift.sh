@@ -161,6 +161,9 @@ htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
 oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
 
 if [ "$PVS" = "true" ]; then
+
+	curl -o vol.yaml $SCRIPT_REPO/vol.yaml
+
 	for i in `seq 1 200`;
 	do
 		DIRNAME="vol$i"
