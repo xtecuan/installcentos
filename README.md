@@ -1,3 +1,5 @@
+**Note:  ** Update: November 2019 - I no longer work at Red Hat on the OpenShift team.  Given that, I will not be updating this repo to work with OpenShift 4.x on baremetal.  My future work will be centered on a more pure upstream kubernetes experience.  If a community member wants to add support for 4.x, I will gladly accept a PR.
+
 Install RedHat OKD 3.11 on your own server.  For a local only install, it is suggested that you use CDK or MiniShift instead of this repo.  This install method is targeted for a single node cluster that has a long life.
 
 This repository is a set of scripts that will allow you easily install the latest version (3.11) of OKD in a single node fashion.  What that means is that all of the services required for OKD to function (master, node, etcd, etc.) will all be installed on a single host.  The script supports a custom hostname which you can provide using the interactive mode.
