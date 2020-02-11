@@ -210,15 +210,12 @@ then
 		mkdir ~/.secrets
 		mkdir ~/.secrets/certbot
 
-		cat << EOF >> ~/.secrets/certbot/cloudflare.ini
+		cat <<EOT >> cloudflare.ini
 
 		# Cloudflare API credentials used by Certbot
-		dns_cloudflare_email = $CF_MAIL
-		dns_cloudflare_api_key = $CF_KEY
-
-		EOF
-
-
+		dns_cloudflare_email = ${CF_MAIL}
+		dns_cloudflare_api_key = ${CF_KEY}
+EOT
 
 		# Configure Let's Encrypt certificate
 		certbot certonly --dns-cloudflare \
