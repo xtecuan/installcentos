@@ -13,6 +13,9 @@ export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/okd-communi
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
 export LETSENCRYPT=${LETSENCRYPT:="false"}
+export CLOUDFLARE=${CLOUDFLARE:="false"}
+export CF_MAIL=${CF_MAIL:="example@email.com"}
+export CF_KEY=${CF_KEY:="xxxxxx"}
 export MAIL=${MAIL:="example@email.com"}
 
 ## Make the script interactive to set the variables
@@ -44,10 +47,10 @@ if [ "$INTERACTIVE" = "true" ]; then
 	read -rp "API Port: ($API_PORT): " choice;
 	if [ "$choice" != "" ] ; then
 		export API_PORT="$choice";
-	fi 
+	fi
 
 	echo "Do you wish to enable HTTPS with Let's Encrypt?"
-	echo "Warnings: " 
+	echo "Warnings: "
 	echo "  Let's Encrypt only works if the IP is using publicly accessible IP and custom certificates."
 	echo "  This feature doesn't work with OpenShift CLI for now."
 	select yn in "Yes" "No"; do
@@ -57,14 +60,35 @@ if [ "$INTERACTIVE" = "true" ]; then
 			*) echo "Please select Yes or No.";;
 		esac
 	done
-	
+
 	if [ "$LETSENCRYPT" = true ] ; then
 		read -rp "Email(required for Let's Encrypt): ($MAIL): " choice;
 		if [ "$choice" != "" ] ; then
 			export MAIL="$choice";
 		fi
+
+		echo "Are you using ClodFlare as DNS-Provider?"
+		select yn in "Yes" "No"; do
+			case $yn in
+				Yes) export CLOUDFLARE=true; break;;
+				No) export CLOUDFLARE=false; break;;
+				*) echo "Please select Yes or No.";;
+			esac
+		done
+
+		if ["$CLOUDFLARE" = true]; then
+			read -rp "CloudFlare Username (E-Mail): ($CF_MAIL): " choice;
+			if [ "$choice" != "" ] ; then
+				export CF_MAIL="$choice";
+			fi
+
+			read -rp "CloudFlare Global APi-Key: ($CF_KEY): " choice;
+			if [ "$choice" != "" ] ; then
+				export CF_KEY="$choice";
+			fi
+		fi
 	fi
-	
+
 	echo
 
 fi
@@ -99,7 +123,7 @@ yum -y install epel-release
 # Disable the EPEL repository globally so that is not accidentally used during later steps of the installation
 sed -i -e "s/^enabled=1/enabled=0/" /etc/yum.repos.d/epel.repo
 
-systemctl | grep "NetworkManager.*running" 
+systemctl | grep "NetworkManager.*running"
 if [ $? -eq 1 ]; then
 	systemctl start NetworkManager
 	systemctl enable NetworkManager
@@ -114,12 +138,12 @@ yum -y --enablerepo=epel install ansible.rpm
 [ ! -d openshift-ansible ] && git clone https://github.com/openshift/openshift-ansible.git -b release-${VERSION} --depth=1
 
 cat <<EOD > /etc/hosts
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-${IP}		$(hostname) console console.${DOMAIN}  
+${IP}		$(hostname) console console.${DOMAIN}
 EOD
 
-if [ -z $DISK ]; then 
+if [ -z $DISK ]; then
 	echo "Not setting the Docker storage."
 else
 	cp /etc/sysconfig/docker-storage-setup /etc/sysconfig/docker-storage-setup.bk
@@ -175,21 +199,49 @@ if [ ! -z "${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}" ]; then
 fi
 
 # Let's Encrypt setup
-if [ "$LETSENCRYPT" = true ] ; then
+if [ "$LETSENCRYPT" = true ] ;
+then
 	# Install CertBot
 	yum install --enablerepo=epel -y certbot
 
-	# Configure Let's Encrypt certificate
-	certbot certonly --manual \
-			--preferred-challenges dns \
-			--email $MAIL \
-			--server https://acme-v02.api.letsencrypt.org/directory \
-			--agree-tos \
-			-d $DOMAIN \
-			-d *.$DOMAIN \
-			-d *.apps.$DOMAIN
-	
-	## Modify inventory.ini 
+	if ["$CLOUDFLARE" = true]; then
+		yum install -y --enablerepo=epel python2-cloudflare python2-certbot-dns-cloudflare
+
+		mkdir ~/.secrets
+		mkdir ~/.secrets/certbot
+
+		cat << EOF >> ~/.secrets/certbot/cloudflare.ini
+
+		# Cloudflare API credentials used by Certbot
+		dns_cloudflare_email = $CF_MAIL
+		dns_cloudflare_api_key = $CF_KEY
+
+		EOF
+
+
+
+		# Configure Let's Encrypt certificate
+		certbot certonly --dns-cloudflare \
+		    --server https://acme-v02.api.letsencrypt.org/directory \
+		    --dns-cloudflare-credentials ~/.secrets/certbot/cloudflare.ini \
+				--email $MAIL \
+		    -d $DOMAIN \
+		    -d *.$DOMAIN \
+		    -d *.apps.$DOMAIN
+
+  else
+		# Configure Let's Encrypt certificate
+		certbot certonly --manual \
+				--preferred-challenges dns \
+				--email $MAIL \
+				--server https://acme-v02.api.letsencrypt.org/directory \
+				--agree-tos \
+				-d $DOMAIN \
+				-d *.$DOMAIN \
+				-d *.apps.$DOMAIN
+	fi
+
+	## Modify inventory.ini
 	# Declare usage of Custom Certificate
 	# Configure Custom Certificates for the Web Console or CLI => Doesn't Work for CLI
 	# Configure a Custom Master Host Certificate
@@ -197,21 +249,21 @@ if [ "$LETSENCRYPT" = true ] ; then
 	# Configure a Custom Certificate for the Image Registry
 	## See here for more explanation: https://docs.okd.io/latest/install_config/certificate_customization.html
 	cat <<EOT >> inventory.ini
-	
+
 	openshift_master_overwrite_named_certificates=true
-	
+
 	openshift_master_cluster_hostname=console-internal.${DOMAIN}
 	openshift_master_cluster_public_hostname=console.${DOMAIN}
-	
+
 	openshift_master_named_certificates=[{"certfile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "cafile": "/etc/letsencrypt/live/${DOMAIN}/chain.pem", "names": ["console.${DOMAIN}"]}]
-	
+
 	openshift_hosted_router_certificate={"certfile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "cafile": "/etc/letsencrypt/live/${DOMAIN}/chain.pem"}
-	
+
 	openshift_hosted_registry_routehost=registry.apps.${DOMAIN}
 	openshift_hosted_registry_routecertificates={"certfile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "cafile": "/etc/letsencrypt/live/${DOMAIN}/chain.pem"}
 	openshift_hosted_registry_routetermination=reencrypt
 EOT
-	
+
 	# Add Cron Task to renew certificate
 	echo "@weekly  certbot renew --pre-hook=\"oc scale --replicas=0 dc router\" --post-hook=\"oc scale --replicas=1 dc router\"" > certbotcron
 	crontab certbotcron
@@ -234,10 +286,10 @@ if [ "$PVS" = "true" ]; then
 	for i in `seq 1 200`;
 	do
 		DIRNAME="vol$i"
-		mkdir -p /mnt/data/$DIRNAME 
+		mkdir -p /mnt/data/$DIRNAME
 		chcon -Rt svirt_sandbox_file_t /mnt/data/$DIRNAME
 		chmod 777 /mnt/data/$DIRNAME
-		
+
 		sed "s/name: vol/name: vol$i/g" vol.yaml > oc_vol.yaml
 		sed -i "s/path: \/mnt\/data\/vol/path: \/mnt\/data\/vol$i/g" oc_vol.yaml
 		oc create -f oc_vol.yaml
