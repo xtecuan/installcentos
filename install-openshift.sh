@@ -67,7 +67,7 @@ if [ "$INTERACTIVE" = "true" ]; then
 			export MAIL="$choice";
 		fi
 
-		echo "Are you using ClodFlare as DNS-Provider?"
+		echo "Are you using CloudFlare as DNS-Provider?"
 		select yn in "Yes" "No"; do
 			case $yn in
 				Yes) export CLOUDFLARE=true; break;;
