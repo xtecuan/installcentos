@@ -76,7 +76,7 @@ if [ "$INTERACTIVE" = "true" ]; then
 			esac
 		done
 
-		if ["$CLOUDFLARE" = true]; then
+		if [ "$CLOUDFLARE" = true ] ; then
 			read -rp "CloudFlare Username (E-Mail): ($CF_MAIL): " choice;
 			if [ "$choice" != "" ] ; then
 				export CF_MAIL="$choice";
@@ -204,7 +204,7 @@ then
 	# Install CertBot
 	yum install --enablerepo=epel -y certbot
 
-	if ["$CLOUDFLARE" = true]; then
+	if [ "$CLOUDFLARE" = true ] ; then
 		yum install -y --enablerepo=epel python2-cloudflare python2-certbot-dns-cloudflare
 
 		mkdir ~/.secrets
