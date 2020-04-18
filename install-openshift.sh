@@ -269,6 +269,9 @@ EOT
 	rm certbotcron
 fi
 
+mkdir -p /etc/rhsm/ca
+openssl s_client -showcerts -servername registry.access.redhat.com -connect registry.access.redhat.com:443 </dev/null 2>/dev/null | openssl x509 -text > /etc/rhsm/ca/redhat-uep.pem
+
 mkdir -p /etc/origin/master/
 touch /etc/origin/master/htpasswd
 
